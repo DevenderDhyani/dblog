@@ -6,6 +6,8 @@ export const hashPassword = async (plainTextPassword) => {
     const hashedPassword = await bcrypt.hash(plainTextPassword, saltRounds);
     return hashedPassword;
 };
+
+//varifying password
 export const verifyPassword = async (plainTextPassword, hashedPassword) => {
     const isMatch = await bcrypt.compare(plainTextPassword, hashedPassword);
     return isMatch;

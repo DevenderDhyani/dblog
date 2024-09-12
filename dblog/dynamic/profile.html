@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+        .profile-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .profile-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #ddd;
+        }
+
+        h1 {
+            font-family: Arial, sans-serif;
+            font-size: 24px;
+            margin: 20px 0 10px;
+        }
+
+        p {
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+<div class="profile-container">
+    <img src="https://via.placeholder.com/150" alt="Profile Image" class="profile-image">
+    <h1>John Doe</h1>
+    <p>Web Developer</p>
+</div>
+
+</body>
+<script>
+    function getCookies() {
+    // Get all cookies as a single string
+    const cookies = Document.cookies()
+
+    // Display cookies in the console
+    console.log("Cookies: ", cookies);
+
+    // If there are no cookies, return a message
+    if (!cookies) {
+        return "No cookies found";
+    }
+
+    // Return cookies
+    return cookies;
+}
+
+// Call the function and log the result
+getCookies()
+</script>
+</html>

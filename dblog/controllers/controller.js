@@ -1,5 +1,6 @@
 //bring in prisma and cookie
 
+import GetJWTtoken from "../helper/getToken.js";
 import prisma from "../prisma/index.js"
 import { hashPassword, verifyPassword } from "../utils/bcrypt.js";
 import cookieToken from "../utils/cookieToken.js"
@@ -32,7 +33,6 @@ export const signup = async (req, res, next) => {
             }
         })
         //send user a token
-        cookieToken(user, res)
         console.log("After token send back...\n", user)
 
     } catch (err) {
@@ -40,22 +40,41 @@ export const signup = async (req, res, next) => {
     }
 }
 
-export const login = async (req, res) => {
+export const auth = async (req, res,next) => {
     console.log("entered into login\n")
     const { email, password } = req.body
     console.log(email, password)
-
     const user = await prisma.user.findUnique({
         where: { email: email },
+        include: {posts:true}
     })
-    if (!user) {
-        console.log("there is no user whith email id", email)
+    if(!user){
+        console.log("This user does not exist into the database")
+        throw new Error()
     }
-    else if (await varifyPassword(password, user.password)) {
-        console.log("wrong password")
-    } else {
-        console.log("User has been found in the data base")
+    const isMatch = await verifyPassword(password, user.password)
+    if(!isMatch){
+        console.log("Password is not correct*****")
+        throw new Error()
     }
+    const token = GetJWTtoken(user.id)
+    user.password = undefined
+    res.cookie("token", token, {
+        expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+        httpOnly: true
+    })
+    console.log(user)
+    req.token = token
+    res.json("Recieved token successfully...")
+    
+    next()
 }
+
+//authrization
+export const authR = async(req,res) => {
+   const token =  req.cookies.token || req.headers['token'] || req.token; 
+    console.log("authR : ",token)
+}
+    
 
 

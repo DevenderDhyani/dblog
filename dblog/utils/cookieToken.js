@@ -1,4 +1,6 @@
 import GetJWTtoken from "../helper/getToken.js"
+import path from 'path'
+import { fileURLToPath } from 'url';
 const cookieToken = (user, res) => {
     console.log("token creation")
     const token = GetJWTtoken(user.id)
@@ -9,11 +11,17 @@ const cookieToken = (user, res) => {
         httpOnly: true
     }
     user.password = undefined
-    res.status(200).cookie("token", token, options).json({
-        success: true,
-        token,
+    res.cookie("token",token,options)
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    res.sendFile(path.join(__dirname, "..", 'dynamic', 'profile.html'),{
         user
-    })
+    });
+    // res.status(200).cookie("token", token, options).json({
+    //     success: true,
+    //     token,
+    //     user
+    // })
 }
 
 export default cookieToken;
