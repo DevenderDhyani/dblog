@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  name     String?
+  email    String  @unique //to reflect this into our mongodb we need to add cmd in terminal npx prisma db pull
+  password String
+  posts    Post[]
+}
+
+model Post {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  title    String
+  body     String
+  author   User   @relation(fields: [authorId], references: [id])
+  authorId String @db.ObjectId
+}
+
+// The Relation Overview
+// In Prisma, when you define a relationship between two models (like User and Post), you need two things:
+
+// A relation field: This is an object that connects one model to another, like author in the Post model.
+// A foreign key field: This stores the actual ID that links the two models, like authorId.
+// These two fields work together to represent the relationship between a Post and a User.
+
+// Key Concepts
+// author (Relation Field):
+
+// This is the actual relationship between the Post and User.
+// In Prisma, the author field represents the entire User object that authored the post. So, you can access properties like author.name, author.email, etc.
+// It does not directly store the id of the User; instead, it allows you to access the entire User object.
+// Prisma manages the linking between the models behind the scenes using the foreign key (authorId).
+// authorId (Foreign Key Field):
+
+// This is the foreign key field in the Post model.
+// It directly stores the id (which is of type ObjectId in MongoDB) of the User who authored the post.
+// This is the actual field that contains the reference to the User model. Prisma uses this field to look up the corresponding User for each Post.
+// Explanation of Annotations
+// @relation(fields: [authorId], references: [id]):
+// fields: [authorId]:
+// This tells Prisma that the authorId field in the Post model is the foreign key that will hold the reference to the User model. Essentially, authorId will store the id of the user who authored the post.
+// references: [id]:
+// This specifies that the authorId foreign key in the Post model references the id field in the User model. In other words, the value of authorId must match an existing id in the User model.
+// Together, this annotation links the Post model to the User model, with authorId being the foreign key and id being the referenced field in User.
+
+// authorId @db.ObjectId:
+// This annotation tells Prisma that the authorId field is of type ObjectId, which is specific to MongoDB. It ensures that Prisma treats the authorId field as a MongoDB ObjectId.
+// Summary of the Post Model
