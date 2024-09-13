@@ -1,6 +1,7 @@
 import { compareSync } from 'bcrypt';
 import path from 'path'
 import { fileURLToPath } from 'url';
+import prisma from '../prisma/index.js';
 
 
 export const createBlog = (req, res) => {
