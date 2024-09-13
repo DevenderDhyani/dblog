@@ -1,6 +1,9 @@
 import cookieParser from 'cookie-parser'
 import express from 'express'
 import rout from './routers/router.js'
+import postrout from './routers/postRouter.js'
+import prisma from './prisma/index.js'
+import apiRout from './routers/apiRouter.js'
 
 //creating express app
 const app = express()
@@ -14,18 +17,28 @@ app.use(cookieParser())
 
 //defining route
 app.use('/user', rout)
+app.use("/posts", postrout)
+app.use("/api", apiRout)
 
-// app.use((req, res, next) => {
-//     const requestPath = req.url;
-//     // Block access to specific files like 'profile.html'
-//     if (requestPath === '/profile.html' || requestPath.startsWith('/static/')) {
-//         res.status(403).send('Access denied');
-//     } else {
-//         next();
-//     }
-// });
+app.use((req, res, next) => {
+    const requestPath = req.url;
+    // Block access to specific files like 'profile.html'
+    if (requestPath === '/profile.html' || requestPath.startsWith('/static/')) {
+        res.status(403).send('Access denied');
+    } else {
+        next();
+    }
+});
 // to start index file as localhost:portnumber hit in the url while server is running
 app.use(express.static('./static'))
+
+
+
+
+
+
+
+
 
 app.listen(3000, () => {
     console.log("working...")
