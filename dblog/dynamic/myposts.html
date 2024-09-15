@@ -1,11 +1,355 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>myPosts</title>
+    <title>Profile</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            min-height: 100vh;
+        }
+
+        .profile-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .profile-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid #e9ecef;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .profile-image:hover {
+            transform: scale(1.1);
+            border-color: #3498db;
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #333;
+            margin: 10px 0;
+        }
+
+        p {
+            font-size: 18px;
+            color: #555;
+            margin: 0;
+        }
+
+        form {
+            margin: 15px 0;
+        }
+
+        form button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        form button:hover {
+            background-color: #2980b9;
+        }
+
+        .post-container {
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        .post {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .post-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+            text-align: left;
+        }
+
+        .post-body {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .post-actions {
+            display: flex;
+            justify-content: flex-start;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .post-actions button {
+            padding: 8px 16px;
+            background-color: #3498db;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .post-actions button.delete-btn {
+            background-color: #e74c3c;
+        }
+
+        .post-actions button:hover {
+            background-color: #2980b9;
+        }
+
+        .post-actions button.delete-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .hidden-form {
+            display: none;
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .hidden-form input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .hidden-form button {
+            padding: 8px 16px;
+            background-color: #2ecc71;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .hidden-form button:hover {
+            background-color: #27ae60;
+        }
+
+        /* Additional Media Query for Smaller Screens */
+        @media (max-width: 768px) {
+            .profile-container {
+                padding: 20px;
+            }
+
+            .post {
+                padding: 15px;
+            }
+
+            .post-title {
+                font-size: 20px;
+            }
+
+            .post-body {
+                font-size: 16px;
+            }
+
+            .post-actions button {
+                font-size: 12px;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    
+
+    <div class="profile-container">
+        <img src="https://via.placeholder.com/150" alt="Profile Image" class="profile-image">
+        <p id="content">Hi</p>
+        <h1 id="username"></h1>
+        <form action="/user/logout" method="post">
+            <input type="hidden" name="data" value="someValue">
+            <button type="submit">Sign Out</button>
+        </form>
+    </div>
+
+    <div class="post-container">
+        <form action="/posts" method="post">
+            <button type="submit">Create Post (+)</button>
+        </form>
+        <br><br>
+        <form action="/posts/home" method="post">
+            <button type="submit">Home</button>
+        </form>
+
+
+
+        <div id="container"></div>
+    </div>
+
+    <script>
+        const getallPosts = async () => {
+            try {
+                const cUser = await fetch("http://localhost:3000/posts/currentUser");
+                const cUserData = await cUser.json();
+                const username = document.getElementById("username");
+                username.innerText = cUserData.user.name;
+
+                const response = await fetch("http://localhost:3000/posts/myposts");
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const posts = await response.json();
+
+                const container = document.getElementById('container');
+                container.innerHTML = ''; // Clear existing content
+
+                if (Array.isArray(posts.data.posts) && posts.data.posts.length > 0) {
+                    posts.data.posts.forEach(post => {
+                        const postElement = document.createElement('div');
+                        postElement.classList.add('post');
+
+                        const titleElement = document.createElement('div');
+                        titleElement.classList.add('post-title');
+                        titleElement.textContent = post.title;
+
+                        const bodyElement = document.createElement('div');
+                        bodyElement.classList.add('post-body');
+                        bodyElement.textContent = post.body;
+
+                        // Post action buttons (Delete and Update)
+                        const postActions = document.createElement('div');
+                        postActions.classList.add('post-actions');
+
+                        const deleteButton = document.createElement('button');
+                        deleteButton.textContent = 'Delete';
+                        deleteButton.addEventListener('click', async () => {
+                            try {
+                                const deleteResponse = await fetch(`http://localhost:3000/posts/delete/${post.id}`, {
+                                    method: 'DELETE'
+                                });
+                                if (deleteResponse.ok) {
+                                    alert('Post deleted successfully');
+                                    postElement.remove(); // Remove post from the DOM
+                                } else {
+                                    alert('Failed to delete post');
+                                }
+                            } catch (error) {
+                                console.error('Error:', error);
+                                alert('An error occurred. Please try again.');
+                            }
+                        });
+
+                        const updateButton = document.createElement('button');
+                        updateButton.textContent = 'Update';
+                        const formElement = createUpdateForm(post);
+                        postActions.appendChild(deleteButton);
+                        postActions.appendChild(updateButton);
+
+                        updateButton.addEventListener('click', () => {
+                            // Toggle form visibility
+                            formElement.classList.toggle('hidden-form');
+                        });
+
+                        postElement.appendChild(titleElement);
+                        postElement.appendChild(bodyElement);
+                        postElement.appendChild(postActions);
+                        postElement.appendChild(formElement);
+
+                        container.appendChild(postElement);
+                    });
+                } else {
+                    container.innerText = 'No posts available.';
+                }
+            } catch (error) {
+                console.error('Error fetching posts:', error);
+            }
+        };
+
+        // Function to create update form
+        const createUpdateForm = (post) => {
+            const formElement = document.createElement('form');
+            formElement.classList.add('update-form', 'hidden-form');
+
+            const inputField = document.createElement('input');
+            inputField.name = 'content';
+            inputField.placeholder = 'Enter new content';
+            formElement.appendChild(inputField);
+
+            const submitButton = document.createElement('button');
+            submitButton.type = 'submit';
+            submitButton.textContent = 'Submit';
+            formElement.appendChild(submitButton);
+
+            formElement.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const formData = new FormData(formElement);
+                const data = {};
+                formData.forEach((value, key) => {
+                    data[key] = value;
+                });
+
+                try {
+                    const updateResponse = await fetch(`http://localhost:3000/posts/updatePost/${post.id}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                    });
+
+                    if (updateResponse.ok) {
+                        alert('Post updated successfully');
+                        formElement.reset();
+                        formElement.classList.add('hidden-form'); // Hide form after update
+                    } else {
+                        throw new Error('Update failed');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                }
+            });
+
+            return formElement;
+        };
+
+        // Call the function to fetch and display posts when the page loads
+        getallPosts().then(() => console.log("Posts displayed"));
+    </script>
+
 </body>
+
 </html>

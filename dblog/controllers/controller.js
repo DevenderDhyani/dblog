@@ -91,16 +91,16 @@ export const auth = async (req, res, next) => {
 //authrization
 export const authR = async (req, res, next) => {
     const token = req.cookies.token || req.headers['token'] || req.token || req.params;
-    console.log("authR : ", token)
+    // console.log("authR : ", token)
     jwt.verify(token, process.env.JWT_SECRET, async (err, authData) => {
-        console.log("inside varifying")
+        // console.log("inside varifying")
         if (err) {
-            console.log("inside error")
+            // console.log("inside error")
             res.send({
                 result: "Error occurred while verifying token...."
             });
         } else {
-            console.log("inside else")
+            // console.log("inside else")
             console.log(authData.id);  // Ensure this logs the expected user data
 
             const user = await prisma.user.findUnique({

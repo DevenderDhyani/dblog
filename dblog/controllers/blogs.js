@@ -2,6 +2,7 @@ import { compareSync } from 'bcrypt';
 import path from 'path'
 import { fileURLToPath } from 'url';
 import prisma from '../prisma/index.js';
+import { json } from 'express';
 
 
 export const createBlog = (req, res) => {
@@ -61,10 +62,17 @@ export const myPosts = async (req, res) => {
         data
     })
 }
+export const myPostForm = (req,res) => {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    console.log("entered into blog")
+    res.sendFile(path.join(__dirname, "..", 'dynamic', 'myposts.html'));
+}
+
 export const updatePostForm = async (req, res) => {
     const postId = req.query.postId || req.params.postId
     console.log("Its my post: ",postId)
-    const content = req.body.body
+    const content = req.body.content
     console.log("body: ",content)
     const user = await prisma.post.update({
         where:{id:postId},
@@ -77,10 +85,6 @@ export const updatePostForm = async (req, res) => {
 export const updatePost = async (req, res) => {
     const parameters = req.params
     console.log("This is my postId: ",parameters)
-    // const __filename = fileURLToPath(import.meta.url);
-    // const __dirname = path.dirname(__filename);
-    // console.log("entered into blog")
-    // res.sendFile(path.join(__dirname, "..", 'dynamic', 'profile.html'));
 }
 
 
@@ -89,16 +93,26 @@ export const blogData = async(req,res) => {
     console.log("Recived blog request...")
     const id = req.params.authorId || req.cookies.token
     const user =   await prisma.user.findUnique({
-        where: {id:id},
-        include:{posts:true}
+        where: {id:id}
+        // include:{posts:true}
     })
     console.log("blog data :",user)
     return res.json(user)
 }
 export const currentUser = async (req,res) => {
     const user = req.user
-    console.log(user)
+    // console.log("---------->C:User: ",user)
     return res.json({user})
+}
+
+
+export const deletingPost = async(req,res) => {
+    const deletedPost = await prisma.post.delete({
+        where: {
+            id: req.params.postId,  // Ensure the ID is the same as the one in your schema
+        },
+    });
+    return 
 }
 // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZTJmNzRkZmY3ZTBjM2U2NmE5ZjY0OCIsImlhdCI6MTcyNjIyMTczMCwiZXhwIjoxNzI2MzA4MTMwfQ.HKIyJGIAwBUOnTC7NkYF3U8spuFBJSyjt0ltulEBGYE
 // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZTJmNzRkZmY3ZTBjM2U2NmE5ZjY0OCIsImlhdCI6MTcyNjIyMTczMCwiZXhwIjoxNzI2MzA4MTMwfQ.HKIyJGIAwBUOnTC7NkYF3U8spuFBJSyjt0ltulEBGYE
