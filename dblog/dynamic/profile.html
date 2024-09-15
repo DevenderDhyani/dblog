@@ -7,14 +7,13 @@
     <title>Profile</title>
     <style>
         body {
-
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            /* height: 100vh; */
             background-color: #f8f9fa;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             text-align: center;
@@ -75,6 +74,36 @@
         div>a:not(:last-child) {
             margin-right: 20px;
         }
+
+
+
+        .post {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .post-title {
+            width: 400px;
+            justify-content: center;
+            font-size: 1.5em;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .post-body {
+            width: 400px;
+            justify-content: center;
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+
+        .customColor {
+            color: red;
+        }
     </style>
 </head>
 
@@ -82,8 +111,12 @@
 
     <div class="profile-container">
         <img src="https://via.placeholder.com/150" alt="Profile Image" class="profile-image">
-        <h1>Abc Xyz</h1>
-        <p>Web Developer</p>
+        <p id="content">Hi </p>
+        <h1 id="username"></h1>
+        <form action="/user/logout" method="post">
+            <input type="hidden" name="data" value="someValue">
+            <button type="submit">signout</button>
+        </form>
     </div>
     <div>
         <form action="/posts" method="post">
@@ -99,6 +132,13 @@
             <input type="hidden" name="data" value="someValue">
             <button type="submit">Home</button>
         </form> -->
+
+        <div class="post customColor">
+            <div class="post-title">Title</div>
+            <div class="post-body">Body</div>
+            <div class="post-body">Author</div>
+        </div>
+
         <div id="container">
 
         </div>
@@ -110,15 +150,108 @@
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
-                const data = await response.json();
-                console.log(data);
+                const posts = await response.json();
+                const container = document.getElementById('container');
+                container.innerHTML = ''; // Clear existing content
+    
+                if (Array.isArray(posts.data) && posts.data.length > 0) {
+                    posts.data.forEach(post => {
+                        const postElement = document.createElement('div');
+                        postElement.classList.add('post');
+    
+                        const titleElement = document.createElement('div');
+                        titleElement.classList.add('post-title');
+                        titleElement.textContent = post.title;
+    
+                        const bodyElement = document.createElement('div');
+                        bodyElement.classList.add('post-body');
+                        bodyElement.textContent = post.body;
+    
+                        const userElement = document.createElement('div');
+                        userElement.classList.add('post-body');
+                        userElement.textContent = post.authorId;
+    
+                        const formElement = document.createElement('form');
+                        formElement.classList.add('update-form');
+                        formElement.style.display = 'none'; // Hide the form initially
+    
+                        // Add a hidden input for postId
+                        const inputPostId = document.createElement('input');
+                        // inputPostId.type = 'hidden';
+                        // inputPostId.name = 'postId';
+                        // inputPostId.value = post.id;
+                        // formElement.appendChild(inputPostId);
+    
+                        // Add a text input for any other data (e.g., update content)
+                        const inputField = document.createElement('input');
+                        inputField.name = 'content';
+                        inputField.placeholder = 'Enter content here';
+                        formElement.appendChild(inputField);
+    
+                        // Add a submit button
+                        const submitButton = document.createElement('button');
+                        submitButton.type = 'submit';
+                        submitButton.textContent = 'Submit';
+                        formElement.appendChild(submitButton);
+    
+                        // Append elements to the post element
+                        postElement.appendChild(titleElement);
+                        postElement.appendChild(bodyElement);
+                        postElement.appendChild(userElement);
+                        postElement.appendChild(formElement);
+    
+                        // Add event listener to show the form when the post is clicked
+                        postElement.addEventListener('click', () => {
+                            formElement.style.display = 'block';
+                        });
+    
+                        // Handle form submission
+                        formElement.addEventListener('submit', async (event) => {
+                            event.preventDefault();
+                            const formData = new FormData(formElement);
+                            const data = {};
+                            formData.forEach((value, key) => {
+                                data[key] = value;
+                            });
+    
+                            // Post the form data to your final controller
+                            try {
+                                const response = await fetch(`http://localhost:3000/posts/updatePost/${post.id}`, {
+                                    method: 'PATCH',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify(data),
+                                });
+    
+                                if (response.ok) {
+                                    // Handle successful submission
+                                    alert('Form submitted successfully!');
+                                    formElement.reset();
+                                    formElement.style.display = 'none'; // Hide the form again
+                                } else {
+                                    throw new Error('Form submission failed');
+                                }
+                            } catch (error) {
+                                console.error('Error:', error);
+                                alert('An error occurred. Please try again.');
+                            }
+                        });
+    
+                        container.appendChild(postElement);
+                    });
+                } else {
+                    container.innerText = 'No posts available.';
+                }
             } catch (error) {
-                console.error('There was a problem with the fetch operation:', error);
+                console.error('Error fetching posts:', error);
             }
         };
-
-        getallPosts(); // Call the function to fetch and log the posts
+    
+        // Call the function to fetch and display data when the page loads
+        getallPosts().then(() => console.log("Posts displayed"));
     </script>
+    
 </body>
 
 

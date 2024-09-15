@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Post</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .update-container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .update-container h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .update-container label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .update-container input[type="text"],
+        .update-container textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .update-container textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .update-container button {
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .update-container button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="update-container">
+        <h1>Update Post</h1>
+        <form id="updatePostForm" method="post">
+            <input type="hidden" id="postId" name="postId" value="">
+
+            <label for="postTitle">Title:</label>
+            <input type="text" id="postTitle" name="title" required>
+
+            <label for="postBody">Body:</label>
+            <textarea id="postBody" name="body" required></textarea>
+
+            <button type="submit">Update Post</button>
+        </form>
+    </div>
+
+    <script>
+        // Fetch and populate post data when the page loads
+        window.onload = async function() {
+            const queryParams = new URLSearchParams(window.location.search);
+            const postId = queryParams.get('postId');
+            if (!postId) {
+                alert('No post ID provided!');
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:3000/posts/`);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const postData = await response.json();
+
+                document.getElementById('postId').value = postData.id;
+                document.getElementById('postTitle').value = postData.title;
+                document.getElementById('postBody').value = postData.body;
+            } catch (error) {
+                console.error('There was a problem with the fetch operation:', error);
+            }
+        };
+
+        // Handle form submission
+        document.getElementById('updatePostForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const postId = document.getElementById('postId').value;
+            const title = document.getElementById('postTitle').value;
+            const body = document.getElementById('postBody').value;
+
+            try {
+                const response = await fetch(`http://localhost:3000/posts/${postId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ title, body })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const result = await response.json();
+                alert('Post updated successfully!');
+                window.location.href = '/'; // Redirect to home page or posts list
+            } catch (error) {
+                console.error('There was a problem with the fetch operation:', error);
+            }
+        });
+    </script>
+
+</body>
+
+</html>

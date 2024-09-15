@@ -12,7 +12,7 @@ export const allPosts = async (req, res) => {
     })
 }
 
-export const USP = () => {
 
-}
+
+
 

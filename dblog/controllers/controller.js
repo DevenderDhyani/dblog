@@ -19,6 +19,13 @@ export const loggedIn = (req, res) => {
     console.log("Profile page redirected...")
     res.sendFile(path.join(__dirname, "..", 'dynamic', 'profile.html'));
 }
+export const logout = (req, res) => {
+    res.cookie('token', '', { expires: new Date(0), path: '/' });
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    console.log("Profile page redirected...")
+    res.sendFile(path.join(__dirname, "..", 'static', 'login.html'));
+}
 
 
 
@@ -83,7 +90,7 @@ export const auth = async (req, res, next) => {
 
 //authrization
 export const authR = async (req, res, next) => {
-    const token = req.cookies.token || req.headers['token'] || req.token;
+    const token = req.cookies.token || req.headers['token'] || req.token || req.params;
     console.log("authR : ", token)
     jwt.verify(token, process.env.JWT_SECRET, async (err, authData) => {
         console.log("inside varifying")
@@ -105,13 +112,7 @@ export const authR = async (req, res, next) => {
                 console.log("inside user passord corrected", req.body.password)
                 req.user = user
                 next()
-                // res.json({
-                //     message: "finally data received.",
-                //     authData
-                // });
-                // const __filename = fileURLToPath(import.meta.url);
-                // const __dirname = path.dirname(__filename);
-                // res.sendFile(path.join(__dirname, "..", 'dynamic', 'profile.html'));
+                
             }
             else {
                 console.log("authR : user not found")
